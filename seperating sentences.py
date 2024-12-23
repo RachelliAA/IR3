@@ -1,5 +1,36 @@
 import pandas as pd
 import re
+import nltk
+nltk.download('vader_lexicon')
+
+from nltk.sentiment import SentimentIntensityAnalyzer
+from textblob import TextBlob
+
+israel_words = [
+    "Cabinet", "Colonizers", "Government", "Homeland", "Humanitarian Aid",
+    "IDF", "Iron Dome", "Israel", "Israeli", "Jerusalem", "Jewish",
+    "Knesset", "Mossad", "Netanyahu", "Occupation", "Occupied Territories",
+    "Occupiers", "Parliament", "Settlers", "Tel Aviv", "Tel-Aviv",
+    "West Bank", "West-Bank", "Zionism", "Zionist entity", "Zionist regime",
+    "Zionist State", "cabinet", "colonizers", "government", "homeland",
+    "humanitarian", "aid", "idf", "iron dome", "israel", "israeli",
+    "jerusalem", "jewish", "knesset", "mossad", "netanyahu", "occupation",
+    "occupied", "territories", "occupiers", "parliament", "settlers",
+    "tel aviv", "tel-aviv", "west bank", "west-bank", "zionism",
+    "zionist entity", "zionist", "regime", "zionist state"
+]
+palestine_words = [
+    "Abbas", "Displaced", "Freedom fighters", "Gaza", "Gazans", "Hamas",
+    "Hassan Nasrallah", "Hezbollah", "Houthis", "Humanitarian Crisis", "Intifada",
+    "Iran", "Muhammad Sinuar", "Naim Qassem", "Nakba", "Nukhba", "Oppressed",
+    "Organization", "Palestine", "Palestinians", "PLO", "Refugees", "Resistance",
+    "Resisters", "Sinuar", "Terrorists", "Tyrants", "Victims", "abbas", "displaced",
+    "freedom", "fighters", "gaza", "gazans", "hamas", "hassan", "nasrallah",
+    "hezbollah", "houthis", "humanitarian", "crisis", "intifada", "iran",
+    "muhammad", "sinuar", "naim qassem", "nakba", "nukhba", "oppressed",
+    "organization", "palestine", "palestinians", "plo", "refugees", "resistance",
+    "resisters", "sinuar", "terrorists", "tyrants", "victims"
+]
 
 # Function to split text into sentences
 def split_into_sentences(text):
@@ -9,9 +40,47 @@ def split_into_sentences(text):
     sentences = re.split(r'(?<!\w\.\w.)(?<![A-Z][a-z]\.)(?<=\.|\?|\!)(?=\s|$)', text)
     return [sentence.strip() for sentence in sentences if sentence.strip()]  # Remove empty sentences
 
+#returns true if the sentence is purely pro palestine or pro israel
+def check_sentence(sentence):
+    israel=False
+    palestine=False
+    sentence = sentence.lower()
+    for word in israel_words:
+        if word.lower() in sentence:
+            israel=True
+    for word in palestine_words:
+        if word.lower() in sentence:
+            palestine=True
+    if (palestine and israel) or (not palestine and not israel):
+        return False
+    return True
+
+
+def model_1(sentence):
+    sia = SentimentIntensityAnalyzer()
+    sentiment_score = sia.polarity_scores(sentence)
+    if sentiment_score['compound'] > 0:
+        return "Positive"
+    elif sentiment_score['compound'] < 0:
+        return "Negative"
+    else:
+        return "Neutral"
+
+def model_2(sentence):
+    blob = TextBlob(sentence)
+    sentiment = blob.sentiment.polarity
+
+    if sentiment > 0:
+        return "Positive"
+    elif sentiment < 0:
+        return "Negative"
+    else:
+        return "Neutral"
+
+
 # Load the original Excel file
 input_file = "posts_first_targil.xlsx"  # Replace with the path to your file
-output_file = "sentences.xlsx"
+output_file = "sentences_old.xlsx"
 
 # Read all sheets into a dictionary of DataFrames
 sheets = pd.read_excel(input_file, sheet_name=None)
@@ -35,24 +104,27 @@ for sheet_name, df in sheets.items():
         # Add title sentence as sentence 1
         document_number = idx + 1  # Assuming document number corresponds to row index
         sentence_number = 1
-
-        new_rows.append({
-            "Newspaper": newspaper,
-            "Document Number": document_number,
-            "Sentence Number": 1,
-            "Sentence": title
-        })
-        sentence_number =2
-
-        # Add body sentences starting from sentence 2
-        for sentence in body_sentences:
+        if(check_sentence(title.strip())):
             new_rows.append({
                 "Newspaper": newspaper,
                 "Document Number": document_number,
                 "Sentence Number": sentence_number,
-                "Sentence": sentence.strip(),
+                "Sentence": title
+
             })
-            sentence_number += 1
+            sentence_number =2
+
+        # Add body sentences starting from sentence 2
+        for sentence in body_sentences:
+            if(check_sentence(sentence.strip())):
+                new_rows.append({
+                    "Newspaper": newspaper,
+                    "Document Number": document_number,
+                    "Sentence Number": sentence_number,
+                    "Sentence": sentence.strip()
+
+                })
+                sentence_number += 1
 
     # Create a new DataFrame for the processed sheet
     processed_sheets[sheet_name] = pd.DataFrame(new_rows)
@@ -63,3 +135,6 @@ with pd.ExcelWriter(output_file) as writer:
         processed_df.to_excel(writer, sheet_name=sheet_name, index=False)
 
 print(f"Processed Excel file saved to {output_file}")
+
+
+
