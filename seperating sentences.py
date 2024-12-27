@@ -1,6 +1,7 @@
 import pandas as pd
 import re
 import nltk
+
 nltk.download('vader_lexicon')
 
 from nltk.sentiment import SentimentIntensityAnalyzer
@@ -32,6 +33,7 @@ palestine_words = [
     "resisters", "sinuar", "terrorists", "tyrants", "victims"
 ]
 
+
 # Function to split text into sentences
 def split_into_sentences(text):
     if pd.isna(text):
@@ -40,42 +42,23 @@ def split_into_sentences(text):
     sentences = re.split(r'(?<!\w\.\w.)(?<![A-Z][a-z]\.)(?<=\.|\?|\!)(?=\s|$)', text)
     return [sentence.strip() for sentence in sentences if sentence.strip()]  # Remove empty sentences
 
-#returns true if the sentence is purely pro palestine or pro israel
+
+# returns "I"/"P"/"N" if the sentence is purely pro israel or pro palestine or none
 def check_sentence(sentence):
-    israel=False
-    palestine=False
+    israel = False
+    palestine = False
     sentence = sentence.lower()
     for word in israel_words:
         if word.lower() in sentence:
-            israel=True
+            israel = True
     for word in palestine_words:
         if word.lower() in sentence:
-            palestine=True
+            palestine = True
     if (palestine and israel) or (not palestine and not israel):
-        return False
-    return True
-
-
-def model_1(sentence):
-    sia = SentimentIntensityAnalyzer()
-    sentiment_score = sia.polarity_scores(sentence)
-    if sentiment_score['compound'] > 0:
-        return "Positive"
-    elif sentiment_score['compound'] < 0:
-        return "Negative"
-    else:
-        return "Neutral"
-
-def model_2(sentence):
-    blob = TextBlob(sentence)
-    sentiment = blob.sentiment.polarity
-
-    if sentiment > 0:
-        return "Positive"
-    elif sentiment < 0:
-        return "Negative"
-    else:
-        return "Neutral"
+        return "N"
+    if israel:
+        return "I"
+    return "P"
 
 
 # Load the original Excel file
@@ -104,25 +87,28 @@ for sheet_name, df in sheets.items():
         # Add title sentence as sentence 1
         document_number = idx + 1  # Assuming document number corresponds to row index
         sentence_number = 1
-        if(check_sentence(title.strip())):
+        ip = check_sentence(title.strip())
+        if ip != "N":
             new_rows.append({
                 "Newspaper": newspaper,
                 "Document Number": document_number,
                 "Sentence Number": sentence_number,
-                "Sentence": title
+                "Sentence": title,
+                "I/P": ip
 
             })
-            sentence_number =2
+            sentence_number = 2
 
         # Add body sentences starting from sentence 2
         for sentence in body_sentences:
-            if(check_sentence(sentence.strip())):
+            ip = check_sentence(sentence.strip())
+            if ip != "N":
                 new_rows.append({
                     "Newspaper": newspaper,
                     "Document Number": document_number,
                     "Sentence Number": sentence_number,
-                    "Sentence": sentence.strip()
-
+                    "Sentence": sentence.strip(),
+                    "I/P": ip
                 })
                 sentence_number += 1
 
@@ -135,6 +121,3 @@ with pd.ExcelWriter(output_file) as writer:
         processed_df.to_excel(writer, sheet_name=sheet_name, index=False)
 
 print(f"Processed Excel file saved to {output_file}")
-
-
-
