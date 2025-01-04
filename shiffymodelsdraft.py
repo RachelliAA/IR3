@@ -1,11 +1,11 @@
 import pandas as pd
 import re
 import nltk
+from collections import Counter
+
+from shiffy_models import model_5, model_6, model_7
 
 nltk.download('vader_lexicon')
-
-from nltk.sentiment import SentimentIntensityAnalyzer
-from textblob import TextBlob
 
 israel_words = [
     "Cabinet", "Colonizers", "Government", "Homeland", "Humanitarian Aid",
@@ -61,6 +61,20 @@ def check_sentence(sentence):
     return "P"
 
 
+def check_majority(sentence):
+    results = []
+    for i in range(7):  # Loop from 1 to 7
+        function_name = f"model_{i + 1}"  # Construct the function name as a string
+        results.append(globals()[function_name](sentence))  # Call the function dynamically using globals()
+
+    label_counts = Counter([item['label'] for item in results])
+    majority_label, majority_count = label_counts.most_common(1)[0]
+    majority_items = [item['score'] for item in results if item['label'] == majority_label]
+    average_score = sum(majority_items) / len(majority_items) if majority_items else 0
+    results.append({'label': majority_label, 'score': average_score})
+    return results
+
+
 # Load the original Excel file
 input_file = "posts_first_targil.xlsx"  # Replace with the path to your file
 output_file = "sentences.xlsx"
@@ -89,12 +103,21 @@ for sheet_name, df in sheets.items():
         sentence_number = 1
         ip = check_sentence(title.strip())
         if ip != "N":
+            models_results = check_majority(title)
             new_rows.append({
                 "Newspaper": newspaper,
                 "Document Number": document_number,
                 "Sentence Number": sentence_number,
                 "Sentence": title,
-                "I/P": ip
+                "I/P": ip,
+                "model 5 score": models_results[4]['score'],
+                "model 6 score": models_results[5]['score'],
+                "model 7 score": models_results[6]['score'],
+                "model 5 label": models_results[4]['label'],
+                "model 6 label": models_results[5]['label'],
+                "model 7 label": models_results[6]['label'],
+                "majority": models_results[7]['label'],
+                "majority avg score": models_results[7]['score']
 
             })
             sentence_number = 2
@@ -103,12 +126,21 @@ for sheet_name, df in sheets.items():
         for sentence in body_sentences:
             ip = check_sentence(sentence.strip())
             if ip != "N":
+                models_results = check_majority(sentence.strip())
                 new_rows.append({
                     "Newspaper": newspaper,
                     "Document Number": document_number,
                     "Sentence Number": sentence_number,
                     "Sentence": sentence.strip(),
-                    "I/P": ip
+                    "I/P": ip,
+                    "model 5 score": models_results[4]['score'],
+                    "model 6 score": models_results[5]['score'],
+                    "model 7 score": models_results[6]['score'],
+                    "model 5 label": models_results[4]['label'],
+                    "model 6 label": models_results[5]['label'],
+                    "model 7 label": models_results[6]['label'],
+                    "majority": models_results[7]['label'],
+                    "majority avg score": models_results[7]['score']
                 })
                 sentence_number += 1
 
