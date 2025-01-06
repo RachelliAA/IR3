@@ -1,2 +1,4 @@
 .idea/
- .combined
+combined.py
+venv/
+__pycache__/
