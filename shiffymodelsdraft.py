@@ -3,9 +3,9 @@ import re
 import nltk
 from collections import Counter
 
-from shiffy_models import model_5, model_6, model_7
+from shiffy_models import  model_6
+#nltk.download('vader_lexicon')
 
-nltk.download('vader_lexicon')
 
 israel_words = [
     "Cabinet", "Colonizers", "Government", "Homeland", "Humanitarian Aid",
@@ -77,7 +77,7 @@ def check_majority(sentence):
 
 # Load the original Excel file
 input_file = "posts_first_targil.xlsx"  # Replace with the path to your file
-output_file = "sentences.xlsx"
+output_file = "model6results.xlsx"
 
 # Read all sheets into a dictionary of DataFrames
 sheets = pd.read_excel(input_file, sheet_name=None)
@@ -103,22 +103,15 @@ for sheet_name, df in sheets.items():
         sentence_number = 1
         ip = check_sentence(title.strip())
         if ip != "N":
-            models_results = check_majority(title)
+            model6_results = model_6(title)
             new_rows.append({
                 "Newspaper": newspaper,
                 "Document Number": document_number,
                 "Sentence Number": sentence_number,
                 "Sentence": title,
                 "I/P": ip,
-                "model 5 score": models_results[4]['score'],
-                "model 6 score": models_results[5]['score'],
-                "model 7 score": models_results[6]['score'],
-                "model 5 label": models_results[4]['label'],
-                "model 6 label": models_results[5]['label'],
-                "model 7 label": models_results[6]['label'],
-                "majority": models_results[7]['label'],
-                "majority avg score": models_results[7]['score']
-
+                "model 6 score": model6_results['score'],
+                "model 6 label": model6_results['label']
             })
             sentence_number = 2
 
@@ -126,21 +119,16 @@ for sheet_name, df in sheets.items():
         for sentence in body_sentences:
             ip = check_sentence(sentence.strip())
             if ip != "N":
-                models_results = check_majority(sentence.strip())
+                model7_results = model_6(sentence.strip())
+                print(model7_results)
                 new_rows.append({
                     "Newspaper": newspaper,
                     "Document Number": document_number,
                     "Sentence Number": sentence_number,
                     "Sentence": sentence.strip(),
                     "I/P": ip,
-                    "model 5 score": models_results[4]['score'],
-                    "model 6 score": models_results[5]['score'],
-                    "model 7 score": models_results[6]['score'],
-                    "model 5 label": models_results[4]['label'],
-                    "model 6 label": models_results[5]['label'],
-                    "model 7 label": models_results[6]['label'],
-                    "majority": models_results[7]['label'],
-                    "majority avg score": models_results[7]['score']
+                    "model 6 score": model6_results['score'],
+                    "model 6 label": model6_results['label']
                 })
                 sentence_number += 1
 
