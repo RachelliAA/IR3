@@ -39,7 +39,7 @@ for sheet_name in excel_data.sheet_names:
     updated_sheets[sheet_name] = df
 
 # Save updated Excel with new columns
-output_path = "updated_file.xlsx"
+output_path = "updated_file2.xlsx"
 with pd.ExcelWriter(output_path, engine="openpyxl") as writer:
     for sheet_name, df in updated_sheets.items():
         df.to_excel(writer, index=False, sheet_name=sheet_name)
