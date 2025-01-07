@@ -33,49 +33,36 @@
 # # {'label': 'positive', 'score': 0.9731044769287109}
 
 # 6
-import requests
-#
-# API_URL = "https://api-inference.huggingface.co/models/finiteautomata/bertweet-base-sentiment-analysis"
-# headers = {"Authorization": "Bearer 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"}
+from transformers import AutoTokenizer, AutoModelForSequenceClassification
+import torch
 
-#
-# def model_6(sentence):
-#     response = (requests.post(API_URL, headers=headers, json={"inputs": sentence}).json())[0]
-#     if response[0]['score'] > response[1]['score'] and response[0]['score'] > response[2]['score']:
-#         return response[0]
-#     if response[1]['score'] > response[2]['score']:
-#         return response[1]
-#     return response[2]
-from transformers import pipeline
+# Load the model and tokenizer locally
+MODEL_NAME = "finiteautomata/bertweet-base-sentiment-analysis"
+tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME)
+model = AutoModelForSequenceClassification.from_pretrained(MODEL_NAME)
 
-# Initialize the pipeline (assuming it's a text classification task)
-model = pipeline('text-classification', model='roberta-base', tokenizer='roberta-base')
-
-# Function to get the result in the desired format
 def model_6(sentence):
-    try:
-        # Tokenize and classify the input sentence
-        result = model(sentence)
+    # Tokenize the input sentence
+    inputs = tokenizer(sentence, return_tensors="pt", truncation=True)
 
-        # Format the result as required {'label': 'negative', 'score': 0.9978852868080139}
-        formatted_result = {
-            'label': result[0]['label'],  # Extract the label (e.g., 'negative', 'positive')
-            'score': result[0]['score']   # Extract the score (probability)
-        }
-        return formatted_result
-    except Exception as e:
-        raise RuntimeError(f"An error occurred during model inference: {e}")
+    # Perform inference
+    with torch.no_grad():
+        outputs = model(**inputs)
 
-# Test the function with an example sentence
-sentence = "I love this product!"  # Example input sentence
-result = model_6(sentence)
-print(result)
+    # Get the predicted probabilities
+    scores = torch.nn.functional.softmax(outputs.logits, dim=1)
 
+    # Map the scores to their respective labels
+    labels = ["negative", "neutral", "positive"]
+    scores_dict = [{ "label": labels[i], "score": score.item()} for i, score in enumerate(scores[0])]
 
+    # Find the best response based on the highest score
+    best_response = max(scores_dict, key=lambda x: x['score'])
+    return best_response
 
-# to do!!! change NEG to negative, etc
+# Example usage
 
-# print(model_6("don't you dare do that ever again!"))
+#print(model_6("don't you dare do that ever again!" * 20))
 # {'label': 'NEG', 'score': 0.9705923199653625}
 
 # 7

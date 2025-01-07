@@ -119,8 +119,8 @@ for sheet_name, df in sheets.items():
         for sentence in body_sentences:
             ip = check_sentence(sentence.strip())
             if ip != "N":
-                model7_results = model_6(sentence.strip())
-                print(model7_results)
+                model6_results = model_6(sentence.strip())
+                print(model6_results)
                 new_rows.append({
                     "Newspaper": newspaper,
                     "Document Number": document_number,

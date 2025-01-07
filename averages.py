@@ -31,8 +31,8 @@ for sheet_name, df in sheets.items():
     processed_sheets[sheet_name] = process_sheet(df)
 
 # Save the processed sheets to a new Excel file
-with pd.ExcelWriter('with_avg2.xlsx') as writer:
+with pd.ExcelWriter('with_avg_and_maj.xlsx') as writer:
     for sheet_name, df in processed_sheets.items():
         df.to_excel(writer, sheet_name=sheet_name, index=False)
 
-print("Processing complete. The output is saved to 'output_file.xlsx'.")
+print("Processing complete. The output is saved to 'with_avg_and_maj.xlsx'.")
