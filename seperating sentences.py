@@ -4,8 +4,6 @@ import nltk
 
 nltk.download('vader_lexicon')
 
-from nltk.sentiment import SentimentIntensityAnalyzer
-from textblob import TextBlob
 
 israel_words = [
     "Cabinet", "Colonizers", "Government", "Homeland", "Humanitarian Aid",
@@ -62,7 +60,7 @@ def check_sentence(sentence):
 
 
 # Load the original Excel file
-input_file = "posts_first_targil.xlsx"  # Replace with the path to your file
+input_file = "posts_first_targil.xlsx"
 output_file = "sentences.xlsx"
 
 # Read all sheets into a dictionary of DataFrames

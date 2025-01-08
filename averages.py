@@ -1,4 +1,4 @@
-
+#calculates majority sentiments and average scores
 import pandas as pd
 
 # Read the Excel file with multiple sheets into a dictionary

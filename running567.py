@@ -3,7 +3,7 @@ import re
 import nltk
 from collections import Counter
 
-from shiffy_models import  model_6
+from models567 import  model_6
 #nltk.download('vader_lexicon')
 
 
@@ -61,22 +61,8 @@ def check_sentence(sentence):
     return "P"
 
 
-def check_majority(sentence):
-    results = []
-    for i in range(7):  # Loop from 1 to 7
-        function_name = f"model_{i + 1}"  # Construct the function name as a string
-        results.append(globals()[function_name](sentence))  # Call the function dynamically using globals()
-
-    label_counts = Counter([item['label'] for item in results])
-    majority_label, majority_count = label_counts.most_common(1)[0]
-    majority_items = [item['score'] for item in results if item['label'] == majority_label]
-    average_score = sum(majority_items) / len(majority_items) if majority_items else 0
-    results.append({'label': majority_label, 'score': average_score})
-    return results
-
-
 # Load the original Excel file
-input_file = "posts_first_targil.xlsx"  # Replace with the path to your file
+input_file = "posts_first_targil.xlsx"
 output_file = "model6results.xlsx"
 
 # Read all sheets into a dictionary of DataFrames

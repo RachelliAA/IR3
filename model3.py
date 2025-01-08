@@ -6,7 +6,7 @@ def main3():
     pipe = pipeline("text-classification", model="cardiffnlp/twitter-xlm-roberta-base-sentiment")
 
     # Path to your Excel file
-    file_path = "sentences.xlsx"  # Update with your file path
+    file_path = "sentences.xlsx"
     excel_data = pd.ExcelFile(file_path)
 
     updated_sheets = {}

@@ -27,10 +27,3 @@ for sheet, stats in statistics.items():
     print(f"\nStatistics for sheet: {sheet}")
     print(stats)
 
-# # Optionally, save the results to a new Excel file
-# output_path = 'output_statistics.xlsx'
-# with pd.ExcelWriter(output_path) as writer:
-#     for sheet, stats in statistics.items():
-#         stats.to_excel(writer, sheet_name=sheet, index=False)
-#
-# print(f"\nStatistics have been saved to {output_path}.")

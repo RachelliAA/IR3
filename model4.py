@@ -6,7 +6,7 @@ def main4():
     pipe = pipeline("sentiment-analysis", model="siebert/sentiment-roberta-large-english")
 
     # Path to your Excel file
-    file_path = "sentences.xlsx"  # Update with your file path
+    file_path = "sentences.xlsx"
     excel_data = pd.ExcelFile(file_path)
 
     updated_sheets = {}
@@ -45,5 +45,5 @@ def main4():
 
     print(f"Updated file saved as {output_path}")
 
-# Call the main3 function
+# Call the main4 function
 main4()

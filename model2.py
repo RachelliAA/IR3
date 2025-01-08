@@ -25,7 +25,7 @@ def get_sentiment(sentence):
     return scores[max_score_idx], sentiment
 
 # Load Excel file with multiple sheets
-file_path = "sentences.xlsx"  # Update with your Excel file path
+file_path = "sentences.xlsx"
 excel_data = pd.ExcelFile(file_path)
 
 updated_sheets = {}
